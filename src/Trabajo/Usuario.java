@@ -10,7 +10,7 @@ public class Usuario {
         private String primerApellido;
         private String segundoApellido;
         private String username;
-        private String Contraseña;
+        private String Password;
         private String telefono;
         private String correo;
         private String RutaImagen;
@@ -30,7 +30,7 @@ public class Usuario {
             this.primerApellido = primerApellido;
             this.segundoApellido = segundoApellido;
             this.username = username;
-            this.Contraseña= password;
+            this.Password= password;
             this.telefono = telefono;
             this.correo = correo;
             this.RutaImagen = rutaFoto;
@@ -64,7 +64,7 @@ public class Usuario {
 
         public String getUsername() { return username; }
 
-        public String getPassword() { return Contraseña; }
+        public String getPassword() { return Password; }
 
         public String getTelefono() { return telefono; }
 
@@ -101,7 +101,7 @@ public class Usuario {
         }
 
         public void setPassword(String password) {
-            this.Contraseña = password;
+            this.Password = password;
         }
 
         public void setTelefono(String telefono) {
@@ -116,12 +116,21 @@ public class Usuario {
             this.RutaImagen = rutaFoto;
         }
 
-        @Override
-        public String toString() {
-            return "ID: " + id +
-                    " | Usuario: " + username +
-                    " | Nombre: " + primerNombre +
-                    " " + primerApellido;
+    @Override
+    public String toString() {
+        // 1. esto es para tener el nombre completo
+        String nombreCompleto = primerNombre;
+
+        if (segundoNombre != null && !segundoNombre.trim().isEmpty()) {
+            nombreCompleto += " " + segundoNombre;
         }
+
+        nombreCompleto += " " + primerApellido;
+
+        if (segundoApellido != null && !segundoApellido.trim().isEmpty()) {
+            nombreCompleto += " " + segundoApellido;
+        }
+        return id + " - " + nombreCompleto + " (" + tipoIdentificacion + ": " + numeroIdentificacion + ")";
     }
+}
 
