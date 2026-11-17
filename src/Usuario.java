@@ -1,4 +1,4 @@
-package Trabajo;
+import java.awt.event.ActionListener;
 
 public class Usuario {
 
@@ -118,7 +118,7 @@ public class Usuario {
 
     @Override
     public String toString() {
-        // 1. esto es para tener el nombre completo
+
         String nombreCompleto = primerNombre;
 
         if (segundoNombre != null && !segundoNombre.trim().isEmpty()) {
