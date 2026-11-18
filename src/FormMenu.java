@@ -41,7 +41,7 @@ public class FormMenu {
 
 
     public static void main(String[] args) {
-        JFrame ventana = new JFrame("BookUsers");
+        JFrame ventana = new JFrame("BookUsers MezaDrake AndreaRestrepo");
         ventana.setContentPane(new FormMenu().PanelPrincipal);
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ventana.setSize(500, 400);

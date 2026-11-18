@@ -1,4 +1,5 @@
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -9,7 +10,6 @@ public class Registro extends JFrame {
     private int contadorId;
     private String rutaImagenSeleccionada = "";
 
-    // Componentes (Asegúrate de que coincidan exactamente con los de tu .form)
     private JPanel panelPrincipal;
     private JComboBox<String> cmbTipoId;
     private JTextField txtNumeroId;
@@ -22,7 +22,7 @@ public class Registro extends JFrame {
     private JTextField txtTelefono;
     private JTextField txtCorreo;
     private JButton btnFoto;
-    private JLabel lblRutaFoto;
+    private JLabel lblFotoPreview;
     private JButton btnGuardar;
 
     public Registro(ArrayList<Usuario> listaUsuarios, int contadorId) {
@@ -33,10 +33,11 @@ public class Registro extends JFrame {
         setTitle("BookUsers - Registro de Usuario");
         setSize(500, 600);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Cierra solo esta ventana
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         llenarComboBox();
         configurarEventos();
+        configurarUsernameAutomatico();
     }
 
     private void llenarComboBox() {
@@ -46,7 +47,6 @@ public class Registro extends JFrame {
     }
 
     private void configurarEventos() {
-        // Evento para buscar la foto
         btnFoto.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -57,12 +57,15 @@ public class Registro extends JFrame {
                 if (resultado == JFileChooser.APPROVE_OPTION) {
                     File archivoSeleccionado = fileChooser.getSelectedFile();
                     rutaImagenSeleccionada = archivoSeleccionado.getAbsolutePath();
-                    lblRutaFoto.setText(archivoSeleccionado.getName());
+
+                    ImageIcon iconoOriginal = new ImageIcon(rutaImagenSeleccionada);
+                    Image imagenEscalada = iconoOriginal.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH);
+                    lblFotoPreview.setIcon(new ImageIcon(imagenEscalada));
+                    lblFotoPreview.setText("");
                 }
             }
         });
 
-        // Evento para guardar el usuario
         btnGuardar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -72,7 +75,6 @@ public class Registro extends JFrame {
     }
 
     private void guardarUsuario() {
-        // Validaciones
         if (txtNumeroId.getText().isEmpty() || txtPrimerNombre.getText().isEmpty() ||
                 txtPrimerApellido.getText().isEmpty() || txtTelefono.getText().isEmpty() ||
                 txtCorreo.getText().isEmpty() || txtPassword.getPassword().length == 0) {
@@ -86,7 +88,6 @@ public class Registro extends JFrame {
             return;
         }
 
-        // Capturar datos
         String tipoId = (String) cmbTipoId.getSelectedItem();
         String numId = txtNumeroId.getText();
         String primerNom = txtPrimerNombre.getText();
@@ -97,27 +98,51 @@ public class Registro extends JFrame {
         String correo = txtCorreo.getText();
         String password = new String(txtPassword.getPassword());
 
-        // Generar username y mostrarlo
         String username = generarUsername(primerNom, primerApe, numId);
         lblUsername.setText(username);
 
-        // Crear el objeto
         Usuario nuevoUsuario = new Usuario(
                 contadorId, tipoId, numId, primerNom, segundoNom,
                 primerApe, segundoApe, username, password,
                 telefono, correo, rutaImagenSeleccionada
         );
 
-        // Agregar a la lista única
         listaUsuarios.add(nuevoUsuario);
 
         JOptionPane.showMessageDialog(this, "Usuario registrado con éxito.\nUsername: " + username);
-        this.dispose(); // Cierra la ventana de registro
+        this.dispose();
     }
 
     private String generarUsername(String nombre, String apellido, String id) {
         if(nombre.isEmpty() || apellido.isEmpty()) return "";
         String inicial = nombre.substring(0, 1).toLowerCase();
         return inicial + apellido.toLowerCase() + id;
+
+    }
+    private void configurarUsernameAutomatico() {
+        txtPrimerNombre.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
+        });
+
+        txtPrimerApellido.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
+        });
+    }
+
+    private void actualizarUsername() {
+        String nombre = txtPrimerNombre.getText();
+        String apellido = txtPrimerApellido.getText();
+        String id = txtNumeroId.getText();
+
+        if (!nombre.isEmpty() && !apellido.isEmpty()) {
+            String username = generarUsername(nombre, apellido, id);
+            lblUsername.setText(username);
+        } else {
+            lblUsername.setText("");
+        }
     }
 }

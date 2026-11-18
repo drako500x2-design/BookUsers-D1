@@ -4,17 +4,14 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class Listado extends JFrame {
-    // Componentes visuales (deben coincidir con tu .form)
     private JPanel panelPrincipal;
     private JList<Usuario> listaUsuariosView;
     private JButton btnVerDetalle;
     private JButton btnVolver;
 
-    // Variables lógicas
     private ArrayList<Usuario> listaUsuarios;
     private DefaultListModel<Usuario> modeloLista;
 
-    // El constructor ahora se llama Listado
     public Listado(ArrayList<Usuario> listaUsuarios) {
         this.listaUsuarios = listaUsuarios;
 
@@ -39,8 +36,8 @@ public class Listado extends JFrame {
                     return;
                 }
 
-                // Mensaje de prueba
-                JOptionPane.showMessageDialog(null, "Seleccionaste a: " + seleccionado.getPrimerNombre() + " " + seleccionado.getPrimerApellido());
+                Detalles ventanaDetalle = new Detalles(seleccionado);
+                ventanaDetalle.setVisible(true);
             }
         });
 
