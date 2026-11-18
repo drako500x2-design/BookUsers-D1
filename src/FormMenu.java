@@ -37,6 +37,13 @@ public class FormMenu {
                 ventanaListado.setVisible(true);
             }
         });
+        btncreditos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Creditos ventanaCreditos = new Creditos();
+                ventanaCreditos.setVisible(true);
+            }
+        });
     }
 
 

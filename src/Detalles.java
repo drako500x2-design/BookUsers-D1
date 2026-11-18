@@ -3,8 +3,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
+import com.sha2cs.generatepdf.DocumentoPDF;
 
 public class Detalles extends JFrame {
+
     private JPanel panelPrincipal;
     private JLabel lblFoto;
     private JLabel lblNombreCompleto;
@@ -39,6 +42,7 @@ public class Detalles extends JFrame {
         if (usuario.getSegundoApellido() != null && !usuario.getSegundoApellido().isEmpty()) {
             nombreCompleto += " " + usuario.getSegundoApellido();
         }
+
         lblNombreCompleto.setText(nombreCompleto);
         lblTipoId.setText(usuario.getTipoIdentificacion() + ": " + usuario.getNumeroIdentificacion());
         lblTelefono.setText("Teléfono: " + usuario.getTelefono());
@@ -72,8 +76,34 @@ public class Detalles extends JFrame {
         btnGenerarPDF.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Aquí generaremos el PDF pronto.");
+                generarPDF();
             }
         });
+    }
+
+    private void generarPDF() {
+        try {
+            DocumentoPDF documento = new DocumentoPDF("Ficha de usuario - BookUsers");
+
+            if (usuario.getRutaFoto() != null && new File(usuario.getRutaFoto()).isFile()) {
+                documento.imagen(usuario.getRutaFoto());
+            }
+
+            documento.campo("Id", usuario.getId());
+            documento.campo("Tipo de identificación", usuario.getTipoIdentificacion());
+            documento.campo("Número de identificación", usuario.getNumeroIdentificacion());
+            documento.campo("Nombre completo", lblNombreCompleto.getText());
+            documento.campo("Username", usuario.getUsername());
+            documento.campo("Teléfono", usuario.getTelefono());
+            documento.campo("Correo", usuario.getCorreo());
+
+            File pdf = documento.guardar("usuario-" + usuario.getId() + ".pdf");
+
+            JOptionPane.showMessageDialog(this, "PDF generado con éxito en:\n" + pdf.getAbsolutePath());
+            Desktop.getDesktop().open(pdf);
+
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "No se pudo generar el PDF: " + e.getMessage());
+        }
     }
 }
