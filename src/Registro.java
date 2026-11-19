@@ -4,11 +4,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 public class Registro extends JFrame {
     private ArrayList<Usuario> listaUsuarios;
     private int contadorId;
     private String rutaImagenSeleccionada = "";
+
+    private Usuario usuarioAEditar = null;
 
     private JPanel panelPrincipal;
     private JComboBox<String> cmbTipoId;
@@ -22,16 +26,27 @@ public class Registro extends JFrame {
     private JTextField txtTelefono;
     private JTextField txtCorreo;
     private JButton btnFoto;
-    private JLabel lblFotoPreview;
+    private JLabel lblFotoPreview; // Ojo: cambiamos el nombre para la vista previa
     private JButton btnGuardar;
 
     public Registro(ArrayList<Usuario> listaUsuarios, int contadorId) {
         this.listaUsuarios = listaUsuarios;
         this.contadorId = contadorId;
+        this.usuarioAEditar = null;
+        iniciarVentana();
+    }
+    public Registro(ArrayList<Usuario> listaUsuarios, Usuario usuarioAEditar) {
+        this.listaUsuarios = listaUsuarios;
+        this.usuarioAEditar = usuarioAEditar;
+        this.contadorId = usuarioAEditar.getId();
+        iniciarVentana();
+        cargarDatosParaEditar();
+    }
 
+    private void iniciarVentana() {
         setContentPane(panelPrincipal);
-        setTitle("BookUsers - Registro de Usuario");
-        setSize(500, 600);
+        setTitle(usuarioAEditar == null ? "BookUsers - Nuevo Registro" : "BookUsers - Editar Usuario");
+        setSize(500, 650);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -39,11 +54,13 @@ public class Registro extends JFrame {
         configurarEventos();
         configurarUsernameAutomatico();
     }
-
     private void llenarComboBox() {
-        cmbTipoId.addItem("CC - Cédula de Ciudadanía");
-        cmbTipoId.addItem("TI - Tarjeta de Identidad");
-        cmbTipoId.addItem("PA - Pasaporte");
+        cmbTipoId.addItem("11 - Registro civil");
+        cmbTipoId.addItem("12 - Tarjeta de identidad");
+        cmbTipoId.addItem("13 - Cédula de ciudadanía");
+        cmbTipoId.addItem("21 - Tarjeta de extranjería");
+        cmbTipoId.addItem("22 - Cédula de extranjería");
+        cmbTipoId.addItem("41 - Pasaporte");
     }
 
     private void configurarEventos() {
@@ -74,12 +91,30 @@ public class Registro extends JFrame {
         });
     }
 
+    private void cargarDatosParaEditar() {
+        cmbTipoId.setSelectedItem(usuarioAEditar.getTipoIdentificacion());
+        txtNumeroId.setText(usuarioAEditar.getNumeroIdentificacion());
+        txtPrimerNombre.setText(usuarioAEditar.getPrimerNombre());
+        txtSegundoNombre.setText(usuarioAEditar.getSegundoNombre());
+        txtPrimerApellido.setText(usuarioAEditar.getPrimerApellido());
+        txtSegundoApellido.setText(usuarioAEditar.getSegundoApellido());
+        txtTelefono.setText(usuarioAEditar.getTelefono());
+        txtCorreo.setText(usuarioAEditar.getCorreo());
+        lblUsername.setText(usuarioAEditar.getUsername());
+
+        rutaImagenSeleccionada = usuarioAEditar.getRutaFoto();
+        if (rutaImagenSeleccionada != null && !rutaImagenSeleccionada.isEmpty()) {
+            ImageIcon icono = new ImageIcon(rutaImagenSeleccionada);
+            lblFotoPreview.setIcon(new ImageIcon(icono.getImage().getScaledInstance(150, 150, Image.SCALE_SMOOTH)));
+        }
+    }
+
     private void guardarUsuario() {
         if (txtNumeroId.getText().isEmpty() || txtPrimerNombre.getText().isEmpty() ||
                 txtPrimerApellido.getText().isEmpty() || txtTelefono.getText().isEmpty() ||
                 txtCorreo.getText().isEmpty() || txtPassword.getPassword().length == 0) {
 
-            JOptionPane.showMessageDialog(this, "Por favor, llene todos los campos obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Llene todos los campos obligatorios.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -97,40 +132,42 @@ public class Registro extends JFrame {
         String telefono = txtTelefono.getText();
         String correo = txtCorreo.getText();
         String password = new String(txtPassword.getPassword());
+        String username = lblUsername.getText(); // Ya lo generamos automáticamente
 
-        String username = generarUsername(primerNom, primerApe, numId);
-        lblUsername.setText(username);
+        if (usuarioAEditar == null) {
+            Usuario nuevoUsuario = new Usuario(contadorId, tipoId, numId, primerNom, segundoNom,
+                    primerApe, segundoApe, username, password,
+                    telefono, correo, rutaImagenSeleccionada);
+            listaUsuarios.add(nuevoUsuario);
+            JOptionPane.showMessageDialog(this, "Usuario registrado con éxito.");
+        } else {
+            usuarioAEditar.setTipoIdentificacion(tipoId);
+            usuarioAEditar.setNumeroIdentificacion(numId);
+            usuarioAEditar.setPrimerNombre(primerNom);
+            usuarioAEditar.setSegundoNombre(segundoNom);
+            usuarioAEditar.setPrimerApellido(primerApe);
+            usuarioAEditar.setSegundoApellido(segundoApe);
+            usuarioAEditar.setUsername(username);
+            usuarioAEditar.setPassword(password);
+            usuarioAEditar.setTelefono(telefono);
+            usuarioAEditar.setCorreo(correo);
+            usuarioAEditar.setRutaFoto(rutaImagenSeleccionada);
 
-        Usuario nuevoUsuario = new Usuario(
-                contadorId, tipoId, numId, primerNom, segundoNom,
-                primerApe, segundoApe, username, password,
-                telefono, correo, rutaImagenSeleccionada
-        );
+            JOptionPane.showMessageDialog(this, "Usuario actualizado con éxito.");
+        }
 
-        listaUsuarios.add(nuevoUsuario);
-
-        JOptionPane.showMessageDialog(this, "Usuario registrado con éxito.\nUsername: " + username);
         this.dispose();
     }
 
-    private String generarUsername(String nombre, String apellido, String id) {
-        if(nombre.isEmpty() || apellido.isEmpty()) return "";
-        String inicial = nombre.substring(0, 1).toLowerCase();
-        return inicial + apellido.toLowerCase() + id;
-
-    }
     private void configurarUsernameAutomatico() {
-        txtPrimerNombre.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
-        });
-
-        txtPrimerApellido.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { actualizarUsername(); }
-        });
+        DocumentListener listener = new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) { actualizarUsername(); }
+            public void removeUpdate(DocumentEvent e) { actualizarUsername(); }
+            public void changedUpdate(DocumentEvent e) { actualizarUsername(); }
+        };
+        txtPrimerNombre.getDocument().addDocumentListener(listener);
+        txtPrimerApellido.getDocument().addDocumentListener(listener);
+        txtNumeroId.getDocument().addDocumentListener(listener);
     }
 
     private void actualizarUsername() {
@@ -139,8 +176,8 @@ public class Registro extends JFrame {
         String id = txtNumeroId.getText();
 
         if (!nombre.isEmpty() && !apellido.isEmpty()) {
-            String username = generarUsername(nombre, apellido, id);
-            lblUsername.setText(username);
+            String inicial = nombre.substring(0, 1).toLowerCase();
+            lblUsername.setText(inicial + apellido.toLowerCase() + id);
         } else {
             lblUsername.setText("");
         }
