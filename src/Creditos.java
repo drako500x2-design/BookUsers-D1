@@ -13,7 +13,7 @@ public class Creditos extends JFrame {
     public Creditos() {
         setContentPane(panelPrincipal);
         setTitle("BookUsers - Créditos");
-        setSize(450, 300);
+        setSize(570, 300);
         setLocationRelativeTo(null);
 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
